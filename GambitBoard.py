@@ -15,16 +15,21 @@ class GambitGame:
     def move_pawn(self, from_row, from_col, to_row, to_col):
         if self.winner is not None:
             return False  # No moves allowed after the game is won
-
+        print(from_row, from_col, to_row, to_col)
         if self.is_valid_move(from_row, from_col, to_row, to_col):
+            print(f"Moving {self.board[from_row][from_col]} from ({from_row}, {from_col}) to ({to_row}, {to_col})")
+            print(f"Destination before move: {self.board[to_row][to_col]}")
             self.board[to_row][to_col] = self.board[from_row][from_col]
             self.board[from_row][from_col] = ' '
+            print(f"Destination after move: {self.board[to_row][to_col]}")
             if self.check_victory(to_row):
-                self.winner = self.current_turn  # Set the winner
-                return True
-            self.toggle_turn()  # Change turn after a valid move
+                self.winner = self.current_turn
+            self.toggle_turn()
             return True
+        else:
+            print("Invalid move attempted")
         return False
+
     
     def is_moves_left(self):
         # Checks if there are legal moves left for the current player
@@ -35,24 +40,33 @@ class GambitGame:
         return self.is_victory() or not self.is_moves_left()
     
     def is_valid_move(self, from_row, from_col, to_row, to_col):
+        # Check if the selected cell contains a pawn of the current player
         if self.board[from_row][from_col] != self.current_turn:
             return False
 
+        # Prevent moving to the same cell
         if from_row == to_row and from_col == to_col:
             return False
 
-        # Determine direction based on player
-        direction = 1 if self.current_turn == 'P1' else -1
+        # Ensure the move is within the board boundaries
+        if not (0 <= to_row < 7 and 0 <= to_col < 5):
+            return False
 
-        # Forward move
+        # Determine direction based on player maybe here
+        direction = 1 if self.current_turn == 'P1' else -1 #check this
+
+        # Check for a valid forward move
         if from_col == to_col and to_row - from_row == direction:
-            return self.board[to_row][to_col] == ' '
+            return self.board[to_row][to_col] == ' ' #is this to old square
 
-        # Diagonal capture
+        # Check for a valid diagonal capture
         if abs(to_col - from_col) == 1 and to_row - from_row == direction:
-            return self.board[to_row][to_col] != ' ' and self.board[to_row][to_col] != self.current_turn
+            opponent = 'P2' if self.current_turn == 'P1' else 'P1'
+            return self.board[to_row][to_col] == opponent
 
+        # If none of the above conditions are met, the move is invalid
         return False
+
 
     def toggle_turn(self):
         self.current_turn = 'P2' if self.current_turn == 'P1' else 'P1'

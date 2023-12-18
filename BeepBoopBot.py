@@ -1,5 +1,5 @@
 class GambitBot:
-    def __init__(self, game, depth=3):
+    def __init__(self, game, depth=10):
         self.game = game
         self.depth = depth
 
