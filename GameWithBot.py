@@ -50,11 +50,16 @@ class GambitGUI:
 
     def bot_move(self):
         if self.game.current_turn == 'P2' and not self.game.winner:
-            bot_move = self.bot.find_best_move()  # Implement this method in your bot
+            bot_move = self.bot.minimax(self.game, 3, 'P2')  # This should return a move tuple
             if bot_move:
-                self.game.move_pawn(*bot_move)
-                self.draw_pawns()
-                self.check_game_over()
+                # Ensure bot_move is a tuple with 4 elements
+                if isinstance(bot_move, tuple) and len(bot_move) == 4:
+                    self.game.move_pawn(*bot_move)
+                    self.draw_pawns()
+                    self.check_game_over()
+                else:
+                    # Handle the case where bot_move is not in the expected format
+                    print("Invalid move format from bot")
 
     def check_game_over(self):
         if self.game.winner:
