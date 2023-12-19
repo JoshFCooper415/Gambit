@@ -42,7 +42,6 @@ class GambitGUI:
                 if self.game.move_pawn(from_row, from_col, row, col):
                     self.draw_pawns()
                     self.check_game_over()
-                    self.game.toggle_turn()
                     self.bot_move()  # Invoke bot's move
                 self.selected_piece = None
             else:
@@ -51,7 +50,9 @@ class GambitGUI:
 
     def bot_move(self):
         if self.game.current_turn == 'P2' and not self.game.winner:
-            bot_move, _ = self.bot.minimax(self.game, 3, 'P2')
+            print('test')
+            bot_move, _ = self.bot.best_move(3)
+            print(bot_move)
             if bot_move:
                 if isinstance(bot_move, tuple) and len(bot_move) == 4:
                     print("Bot's move:", bot_move)
@@ -59,7 +60,6 @@ class GambitGUI:
                     self.game.move_pawn(*bot_move)
                     self.draw_pawns()
                     self.check_game_over()
-                    self.game.toggle_turn()
             else:
                 print("No move returned by bot")
             return(bot_move)

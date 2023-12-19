@@ -1,62 +1,43 @@
+import random
 class GambitBot:
     def __init__(self, game, depth=10):
         self.game = game
         self.depth = depth
-
-    def minimax(self, board, depth, is_maximizing_player):
-        if board.is_game_over() or depth == 0:
-            return (None, self.evaluate_board())
+    def minimax(self, depth, is_maximizing_player):
+        if depth == 0 or self.game.is_game_over():
+            return self.evaluate_board()
 
         if is_maximizing_player:
-            best_val = float('-inf')
-            best_move = None
-            for move in board.get_legal_moves():
-                _, value = self.minimax(board, depth - 1, False)
-                # Save the current state
-                from_row, from_col, to_row, to_col = move
-                saved_piece = board.board[to_row][to_col]
-                saved_turn = board.current_turn
-
-                # Execute the move
-                board.move_pawn(from_row, from_col, to_row, to_col)
-
-
-                # Undo the move
-                board.board[to_row][to_col] = saved_piece
-                board.board[from_row][from_col] = board.board[to_row][to_col]
-                board.current_turn = saved_turn
-                if value > best_val:
-                    best_val = value
-                    best_move = move
-
-            return (best_move, best_val)
-
+            max_eval = float('-inf')
+            for move in self.game.get_legal_moves():
+                self.make_move(move)
+                eval = self.minimax(depth - 1, False)
+                self.undo_move(move)
+                max_eval = max(max_eval, eval)
+            return max_eval
         else:
-            best_val = float('inf')
-            best_move = None
-            for move in board.get_legal_moves():
-                # Save the current state
-                
-                _, value = self.minimax(board, depth - 1, True)
-                from_row, from_col, to_row, to_col = move
-                saved_piece = board.board[to_row][to_col]
-                saved_turn = board.current_turn
+            min_eval = float('inf')
+            for move in self.game.get_legal_moves():
+                self.make_move(move)
+                eval = self.minimax(depth - 1, True)
+                self.undo_move(move)
+                min_eval = min(min_eval, eval)
+            return min_eval
 
-                # Execute the move
-                board.move_pawn(from_row, from_col, to_row, to_col)
+    def best_move(self, depth):
+        best_score = float('-inf')
+        best_move = None
 
-                best_val = min(best_val, value)
+        for move in self.game.get_legal_moves():
+            self.make_move(move)
+            score = self.minimax(depth - 1, False)
+            self.undo_move(move)
 
-                # Undo the move
-                board.board[to_row][to_col] = saved_piece
-                board.board[from_row][from_col] = board.board[to_row][to_col]
-                board.current_turn = saved_turn
+            if score > best_score:
+                best_score = score
+                best_move = move
 
-                if value < best_val:
-                    best_val = value
-                    best_move = move
-
-            return (best_move, best_val)
+        return best_move, best_score
 
         
     def evaluate_board(self):
@@ -77,3 +58,24 @@ class GambitBot:
                     score += (max_row - distance_to_goal) * direction
 
         return score
+    def make_move(self, move):
+        # Unpack the move tuple
+        from_row, from_col, to_row, to_col = move
+
+        # Move the piece
+        self.game.board[to_row][to_col] = self.game.board[from_row][from_col]
+        self.game.board[from_row][from_col] = ' '
+
+        # Optionally, handle additional game state changes here (like updating current player)
+
+    def undo_move(self, move):
+        # Unpack the move tuple
+        from_row, from_col, to_row, to_col = move
+
+        # Revert the move
+        # Note: This assumes that the only change was the piece movement.
+        # If your game has captures or other state changes, you'll need to handle those here.
+        self.game.board[from_row][from_col] = self.game.board[to_row][to_col]
+        self.game.board[to_row][to_col] = ' '
+
+        # Optionally, revert any additional game state changes here

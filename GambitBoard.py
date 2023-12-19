@@ -17,11 +17,8 @@ class GambitGame:
             return False  # No moves allowed after the game is won
         print(from_row, from_col, to_row, to_col)
         if self.is_valid_move(from_row, from_col, to_row, to_col):
-            print(f"Moving {self.board[from_row][from_col]} from ({from_row}, {from_col}) to ({to_row}, {to_col})")
-            print(f"Destination before move: {self.board[to_row][to_col]}")
             self.board[to_row][to_col] = self.board[from_row][from_col]
             self.board[from_row][from_col] = ' '
-            print(f"Destination after move: {self.board[to_row][to_col]}")
             if self.check_victory(to_row):
                 self.winner = self.current_turn
             self.toggle_turn()
@@ -85,19 +82,25 @@ class GambitGame:
     def get_legal_moves(self):
         # Returns a list of legal moves for the current player
         legal_moves = []
-        for row in range(7):
-            for col in range(5):
-                if self.board[row][col] == self.current_turn:
-                    # Check forward move
-                    new_row = row + (1 if self.current_turn == 'P1' else -1)
-                    if 0 <= new_row < 7 and self.board[new_row][col] == ' ':
-                        legal_moves.append((row, col, new_row, col))
-
-                    # Check diagonal captures
-                    for new_col in [col - 1, col + 1]:
-                        if 0 <= new_col < 5 and self.board[new_row][new_col] not in ['', self.current_turn]:
-                            legal_moves.append((row, col, new_row, new_col))
+        for from_row in range(7):
+            for from_col in range(5):
+                # Check if the cell contains a pawn of the current player
+                if self.board[from_row][from_col] == self.current_turn:
+                    # Potential moves: one step forward, and one step diagonally to left and right
+                    direction = 1 if self.current_turn == 'P1' else -1
+                    potential_moves = [
+                        (from_row + direction, from_col), # Forward move
+                        (from_row + direction, from_col - 1), # Diagonal left
+                        (from_row + direction, from_col + 1) # Diagonal right
+                    ]
+                    
+                    # Check each potential move for legality
+                    for to_row, to_col in potential_moves:
+                        if self.is_valid_move(from_row, from_col, to_row, to_col):
+                            legal_moves.append((from_row, from_col, to_row, to_col))
+        
         return legal_moves
+
     
     def calculate_distance(self, row, player):
         # Distance calculation logic
